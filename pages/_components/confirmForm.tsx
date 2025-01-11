@@ -227,7 +227,7 @@ const AbsenceForm = () => {
     const transformedData = {
       name: formData.name,
       birthday: formData.birthDate.replace(/\./g, "-"), // YY.MM.DD -> YYYY-MM-DD
-      absentYear: absenceYear,
+      absentYear: absenceYear.slice(2, 4),
       absentMonth: absenceMonth,
       absentDay: absenceDay,
       absentTime: getAbsentTime(formData.category),
