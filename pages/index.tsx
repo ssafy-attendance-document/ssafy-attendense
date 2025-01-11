@@ -15,7 +15,6 @@ import {
   Building,
   Pen,
   FileImage,
-  IdCard,
 } from "lucide-react";
 
 interface FormData {
@@ -175,19 +174,44 @@ const AbsenceForm = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    // 결석일시 분리
+    // 날짜 분리
     const [absenceYear, absenceMonth, absenceDay] = formData.absenceDate
       .split("-")
       .map(String);
 
-    console.log({
-      ...formData,
-      absenceYear,
-      absenceMonth,
-      absenceDay,
-      signatureData,
-      documentFile: documentFile ? documentFile.name : null,
-    });
+    // 시간 및 카테고리 매핑
+    const getAbsentTime = (category: string): number => {
+      switch (category) {
+        case "오전":
+          return 0;
+        case "오후":
+          return 1;
+        case "공가":
+          return 2;
+        default:
+          return 0;
+      }
+    };
+
+    // 새로운 형식으로 데이터 변환
+    const transformedData = {
+      name: formData.name,
+      birthday: formData.birthDate.replace(/\./g, "-"), // YY.MM.DD -> YYYY-MM-DD
+      absentYear: absenceYear,
+      absentMonth: absenceMonth,
+      absentDay: absenceDay,
+      absentTime: getAbsentTime(formData.category),
+      absentCategory: formData.category === "공가" ? 0 : 1,
+      absentReason: formData.reason,
+      absentDetail: formData.details,
+      absentPlace: formData.place,
+      signatureUrl: signatureData || "",
+      campus: `${formData.location} 캠퍼스`,
+      class: formData.classNumber,
+      // imageUrl 제외 (요청대로)
+    };
+
+    console.log(transformedData);
   };
   return (
     <Card className="w-full max-w-2xl mx-auto bg-white shadow-lg">
@@ -257,7 +281,7 @@ const AbsenceForm = () => {
               id="name"
               name="name"
               minLength={2}
-              maxLength={4}
+              maxLength={5}
               value={formData.name}
               onChange={handleInputChange}
               required
@@ -273,7 +297,7 @@ const AbsenceForm = () => {
               className="flex items-center gap-2 text-sm font-medium"
               aria-label="생년월일 입력"
             >
-              <IdCard className="w-4 h-4 text-[#3396f4]" />
+              <Calendar className="w-4 h-4 text-[#3396f4]" />
               생년월일
             </Label>
             <Input
@@ -329,6 +353,7 @@ const AbsenceForm = () => {
               className="focus:ring-2 focus:ring-[#3396f4] focus:border-[#3396f4]"
             />
           </div>
+
           {/* 분류 부분 */}
           <div className="space-y-2">
             <Label className="flex items-center gap-2 text-sm font-medium">
@@ -352,10 +377,13 @@ const AbsenceForm = () => {
                   />
                   <Label
                     htmlFor={category}
-                    className="flex items-center justify-center w-full px-4 py-2 rounded-lg border-2 
-                             cursor-pointer text-center
-                             peer-checked:bg-[#3396f4] peer-checked:text-white peer-checked:border-[#3396f4]
-                             hover:bg-[#3396f4]/10 transition-colors"
+                    className={`flex items-center justify-center w-full px-4 py-2 rounded-lg border-2 
+                     cursor-pointer text-center transition-all duration-200
+                     ${
+                       formData.category === category
+                         ? "bg-[#3396f4] text-white border-[#3396f4] shadow-md transform scale-[1.02]"
+                         : "bg-white text-gray-700 border-gray-200 hover:bg-[#3396f4]/10 hover:border-[#3396f4]/30"
+                     }`}
                   >
                     {category}
                   </Label>
