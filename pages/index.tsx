@@ -24,7 +24,7 @@ const AttendancePage = () => {
         {/* 탭 네비게이션 */}
         <div className="max-w-2xl mx-auto">
           <div className="relative flex mb-12">
-            <div className="flex w-full gap-3 bg-white/50 backdrop-blur p-2 rounded-xl">
+            <div className="flex w-full gap-3 bg-white/50 backdrop-blur p-2">
               {/* 소명확인서 탭 */}
               <button
                 onClick={() => setActiveTab("absence")}
@@ -43,7 +43,7 @@ const AttendancePage = () => {
               </button>
 
               {/* 변경요청서 탭 */}
-              <button
+              {/* <button
                 onClick={() => setActiveTab("change")}
                 className={`group relative flex-1 px-6 py-4 rounded-xl text-lg font-medium 
                          transition-all duration-300
@@ -57,7 +57,7 @@ const AttendancePage = () => {
                 {activeTab !== "change" && (
                   <span className="absolute inset-0 rounded-xl border-2 border-transparent group-hover:border-[#3396f4]/20" />
                 )}
-              </button>
+              </button> */}
             </div>
           </div>
 

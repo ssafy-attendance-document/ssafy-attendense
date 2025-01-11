@@ -3,6 +3,9 @@ import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 import { TransformedData, useConfirmStore } from "@/store/confirmStore";
 import { useRouter } from "next/router";
+import { Download } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 
 interface AttendancePreviewProps {
   userInput: TransformedData;
@@ -337,37 +340,41 @@ const AttendancePreview: React.FC<AttendancePreviewProps> = () => {
   };
 
   return (
-    <div id="preview" ref={containerRef}>
-      <div className="button-container-preview">
-        <button className="make-button" onClick={saveImg}>
-          PDF로 저장
-        </button>
-      </div>
-      <div
-        className="canvas-container"
-        style={{ width: "100%", maxWidth: "800px" }}
-      >
-        <canvas
-          id="container"
-          ref={canvas1Ref}
-          style={{
-            width: "100%",
-            height: "auto",
-            display: "block",
-          }}
-        />
-        <canvas
-          id="pictureContainer"
-          ref={canvas2Ref}
-          style={{
-            width: "100%",
-            height: "auto",
-            display: "block",
-            marginTop: "20px",
-          }}
-        />
-      </div>
-    </div>
+    <Card className="w-full max-w-4xl mx-auto bg-white shadow-lg overflow-hidden rounded-none">
+      <CardContent className="p-6 space-y-6">
+        {/* Header with Save Button */}
+        <div className="flex justify-end mb-4">
+          <Button
+            onClick={saveImg}
+            className="bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-2"
+          >
+            <Download className="w-4 h-4" />
+            PDF로 저장
+          </Button>
+        </div>
+
+        {/* Preview Container */}
+        <div ref={containerRef} className="space-y-4">
+          {/* Canvas Container */}
+          <div className="w-full space-y-4">
+            <canvas
+              ref={canvas1Ref}
+              className="w-full h-auto rounded-md shadow-md"
+              style={{
+                display: "block",
+              }}
+            />
+            <canvas
+              ref={canvas2Ref}
+              className="w-full h-auto rounded-md shadow-md"
+              style={{
+                display: "block",
+              }}
+            />
+          </div>
+        </div>
+      </CardContent>
+    </Card>
   );
 };
 

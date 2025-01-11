@@ -1,6 +1,6 @@
 import { create } from "zustand";
 
-interface TransformedData {
+export interface TransformedData {
   name: string;
   birthday: string;
   absentYear: string;
