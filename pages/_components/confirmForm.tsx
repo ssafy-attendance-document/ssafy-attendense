@@ -18,7 +18,6 @@ import {
 } from "lucide-react";
 import { useRouter } from "next/router";
 import { useConfirmStore } from "@/store/confirmStore";
-import Link from "next/link";
 
 interface FormData {
   location: string;
@@ -109,8 +108,8 @@ const AbsenceForm = () => {
       const canvas = canvasRef.current;
       const ctx = canvas.getContext("2d");
       if (ctx) {
-        ctx.strokeStyle = "#000";
-        ctx.lineWidth = 2;
+        ctx.strokeStyle = "#000000";
+        ctx.lineWidth = 4;
         ctx.lineCap = "round";
         ctx.lineJoin = "round";
 
@@ -193,6 +192,16 @@ const AbsenceForm = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    // 파일을 base64로 변환하는 함수
+    const convertFileToBase64 = (file: File): Promise<string> => {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = (error) => reject(error);
+      });
+    };
+
     // 날짜 분리
     const [absenceYear, absenceMonth, absenceDay] = formData.absenceDate
       .split("-")
@@ -224,27 +233,38 @@ const AbsenceForm = () => {
       }
     };
 
-    const transformedData = {
-      name: formData.name,
-      birthday: formData.birthDate.replace(/\./g, "-"), // YY.MM.DD -> YYYY-MM-DD
-      absentYear: absenceYear.slice(2, 4),
-      absentMonth: absenceMonth,
-      absentDay: absenceDay,
-      absentTime: getAbsentTime(formData.category),
-      absentCategory: getAbsentCategory(formData.absentCategory),
-      absentReason: formData.reason.replaceAll("\n", " "),
-      absentDetail: formData.details.replaceAll("\n", " "),
-      absentPlace: formData.place,
-      signatureUrl: signatureData || "",
-      campus: `${formData.location} 캠퍼스`,
-      class: formData.classNumber,
-      appendix: documentFile,
-    };
+    try {
+      // 파일이 있을 경우 base64로 변환
+      let fileBase64 = "";
+      if (documentFile) {
+        fileBase64 = await convertFileToBase64(documentFile);
+      }
 
-    console.log(transformedData);
+      const transformedData = {
+        name: formData.name,
+        birthday: formData.birthDate.replace(/\./g, "-"), // YY.MM.DD -> YYYY-MM-DD
+        absentYear: absenceYear.slice(2, 4),
+        absentMonth: absenceMonth,
+        absentDay: absenceDay,
+        absentTime: getAbsentTime(formData.category),
+        absentCategory: getAbsentCategory(formData.absentCategory),
+        absentReason: formData.reason.replaceAll("\n", " "),
+        absentDetail: formData.details.replaceAll("\n", " "),
+        absentPlace: formData.place,
+        signatureUrl: signatureData || "",
+        campus: `${formData.location} 캠퍼스`,
+        class: formData.classNumber,
+        appendix: fileBase64, // base64 문자열로 변환된 파일
+      };
 
-    setConfirmForm(transformedData);
-    router.push("/preview");
+      console.log(transformedData);
+
+      setConfirmForm(transformedData);
+      router.push("/preview");
+    } catch (error) {
+      console.error("파일 변환 중 에러 발생:", error);
+      // 에러 처리 로직 추가 (예: 사용자에게 알림)
+    }
   };
 
   return (
@@ -411,7 +431,7 @@ const AbsenceForm = () => {
                   />
                   <Label
                     htmlFor={category}
-                    className={`flex items-center justify-center w-full px-4 py-2 rounded-lg border-2 w-[200px]
+                    className={`flex items-center justify-center w-full px-4 py-2 rounded-lg border-2
                      cursor-pointer text-center transition-all duration-200
                      ${
                        formData.category === category
@@ -507,10 +527,10 @@ const AbsenceForm = () => {
                        focus:ring-2 focus:ring-[#3396f4] focus:border-[#3396f4]"
               required
               aria-required="true"
-              maxLength={60}
+              maxLength={80}
             />
             <div className="text-sm text-gray-500 text-right">
-              {formData.details.length}/60자
+              {formData.details.length}/80자
             </div>
           </div>
 

@@ -14,7 +14,7 @@ interface TransformedData {
   signatureUrl: string;
   campus: string;
   class: string;
-  appendix: File | null;
+  appendix: string;
 }
 
 interface FormStore {
@@ -36,7 +36,7 @@ const initialState: TransformedData = {
   signatureUrl: "",
   campus: "",
   class: "",
-  appendix: null,
+  appendix: "",
 };
 
 export const useConfirmStore = create<FormStore>()((set) => ({
