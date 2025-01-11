@@ -26,7 +26,7 @@ interface AttendancePreviewProps {
 const AttendancePreview: React.FC<AttendancePreviewProps> = () => {
   const today = new Date();
   const currentYear = String(today.getFullYear()).slice(2, 4);
-  const currentMonth = String(today.getMonth());
+  const currentMonth = String(today.getMonth() + 1);
   const currentDay = String(today.getDate()).padStart(2, "0");
   const currentDate = {
     currentYear: currentYear,
@@ -63,9 +63,9 @@ const AttendancePreview: React.FC<AttendancePreviewProps> = () => {
   const A4_RATIO = 1.4142; // A4 height/width ratio
 
   const fontStyleTwoCoordinate: Record<string, [number, number]> = {
-    currentYear: [0.38, 0.36],
-    currentMonth: [0.485, 0.836],
-    currentDay: [0.585, 0.836],
+    currentYear: [0.374, 0.9005],
+    currentMonth: [0.485, 0.9005],
+    currentDay: [0.585, 0.9005],
   };
 
   const fontStyleOneCoordinate: Record<string, [number, number]> = {
@@ -74,15 +74,19 @@ const AttendancePreview: React.FC<AttendancePreviewProps> = () => {
     absentYear: [0.352, 0.273],
     absentMonth: [0.45, 0.273],
     absentDay: [0.53, 0.273],
-    absentPlace: [0.345, 0.551],
+    absentPlace: [0.32, 0.647],
     signature: [0.85, 0.66],
-    absentName: [0.35, 0.66],
+    absentName: [0.32, 0.68],
   };
 
   const absentTime = [
     [0.6075, 0.26],
     [0.7, 0.26],
     [0.7915, 0.26],
+  ];
+  const absentCategoryCoordinate = [
+    [0.1, 0.2],
+    [0.1, 0.22],
   ];
 
   // 화면 크기 변경 감지 및 캔버스 크기 조정
@@ -132,8 +136,9 @@ const AttendancePreview: React.FC<AttendancePreviewProps> = () => {
     const checkSize = canvas1.width * 0.018;
 
     const fontSize = Math.max(canvasSize.width * 0.02, 12); // 최소 폰트 크기 설정
+
     setFontStyleOne(`bold ${fontSize}px serif`);
-    setFontStyleTwo(`bold ${fontSize}px serif`);
+    setFontStyleTwo(`bold ${fontSize * 1.7}px serif`);
 
     const docsImg1 = new Image();
     docsImg1.src = docsImageUrls[0];
@@ -157,8 +162,23 @@ const AttendancePreview: React.FC<AttendancePreviewProps> = () => {
           coord[0] * canvasSize.width,
           coord[1] * canvasSize.height
         );
+        ctx1.fillText(
+          "서울 강남구",
+          fontStyleOneCoordinate.absentName[0] * canvasSize.width,
+          fontStyleOneCoordinate.absentName[1] * canvasSize.height
+        );
       });
 
+      const checkedAbsentCategory = userInput.absentCategory;
+      ctx1.drawImage(
+        imgCheck,
+        absentCategoryCoordinate[checkedAbsentCategory][0] * canvas1.width,
+        absentCategoryCoordinate[checkedAbsentCategory][1] * canvas1.height,
+        0.025 * window.innerWidth,
+        0.02 * ((window.innerWidth * 4) / 3)
+      );
+
+      // 마지막 날짜
       ctx1.font = fontStyleTwo;
       Object.keys(fontStyleTwoCoordinate).forEach((key) => {
         const coord = fontStyleTwoCoordinate[key];
