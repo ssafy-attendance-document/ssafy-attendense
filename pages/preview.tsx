@@ -54,6 +54,7 @@ const AttendancePreview: React.FC<AttendancePreviewProps> = () => {
   //   signatureUrl: "/체크.png",
   //   campus: "서울 캠퍼스",
   //   class: "3학년 1반",
+  //   appendix : "/체크.png",
   // };
 
   const docsImageUrls = ["/소명확인서.png", "/소명확인서-별첨.png"];
@@ -297,10 +298,20 @@ const AttendancePreview: React.FC<AttendancePreviewProps> = () => {
       );
     };
 
-    const img2 = new Image();
-    img2.src = docsImageUrls[1];
-    img2.onload = () => {
-      ctx2.drawImage(img2, 0, 0, canvasSize.width, canvasSize.height);
+    const docsImg2 = new Image();
+    docsImg2.src = docsImageUrls[1];
+    docsImg2.onload = () => {
+      ctx2.drawImage(docsImg2, 0, 0, canvasSize.width, canvasSize.height);
+
+      const appendixImg = new Image();
+      appendixImg.src = userInput.appendix;
+      ctx2.drawImage(
+        appendixImg,
+        canvasSize.width * 0.1,
+        canvasSize.height * 0.12,
+        canvasSize.width / 2,
+        canvasSize.height / 2
+      );
     };
   }, [canvasSize, userInput, fontStyleOne, fontStyleTwo]);
 
@@ -320,6 +331,14 @@ const AttendancePreview: React.FC<AttendancePreviewProps> = () => {
 
       pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight);
       pdf.addPage();
+
+      //
+      const canvas2 = canvas2Ref.current;
+      if (!canvas2) return;
+
+      const imgData2 = canvas2.toDataURL("image/png", 1.0);
+
+      pdf.addImage(imgData2, "PNG", 0, 0, imgWidth, imgHeight);
       pdf.save(
         `${userInput.absentYear}${userInput.absentMonth}${userInput.absentDay}_출결확인서_${userInput.name}[${userInput.class}].pdf`
       );
