@@ -102,35 +102,19 @@ const AbsenceForm = () => {
     }
   };
 
-  // 캔버스 초기화 및 설정
   useEffect(() => {
     if (canvasRef.current) {
       const canvas = canvasRef.current;
       const ctx = canvas.getContext("2d");
       if (ctx) {
+        // 캔버스 크기를 작게 설정
+        canvas.width = 250;
+        canvas.height = 150;
+
         ctx.strokeStyle = "#000000";
-        ctx.lineWidth = 4;
+        ctx.lineWidth = 1.5; // 선 두께를 더 얇게 설정
         ctx.lineCap = "round";
         ctx.lineJoin = "round";
-
-        // 캔버스 크기를 컨테이너에 맞게 설정
-        const resizeCanvas = () => {
-          const container = canvas.parentElement;
-          if (container) {
-            const rect = container.getBoundingClientRect();
-            canvas.width = rect.width - 20; // 패딩 고려
-            canvas.height = 200;
-            ctx.strokeStyle = "#000";
-            ctx.lineWidth = 2;
-            ctx.lineCap = "round";
-            ctx.lineJoin = "round";
-          }
-        };
-
-        resizeCanvas();
-        window.addEventListener("resize", resizeCanvas);
-
-        return () => window.removeEventListener("resize", resizeCanvas);
       }
     }
   }, []);
@@ -533,7 +517,7 @@ const AbsenceForm = () => {
               {formData.details.length}/80자
             </div>
           </div>
-
+          {/* 서명 부분 */}
           <div className="space-y-2">
             <Label
               className="flex items-center gap-2 text-sm font-medium"
@@ -542,10 +526,11 @@ const AbsenceForm = () => {
               <Pen className="w-4 h-4 text-[#3396f4]" />
               서명
             </Label>
-            <div className="border rounded-md p-2 bg-white">
+            <div className="inline-block border rounded-md p-2 bg-white">
               <canvas
                 ref={canvasRef}
-                className="border rounded cursor-crosshair w-full touch-none"
+                className="border rounded cursor-crosshair touch-none"
+                style={{ width: "250px", height: "150px" }}
                 onMouseDown={startDrawing}
                 onMouseMove={draw}
                 onMouseUp={stopDrawing}
