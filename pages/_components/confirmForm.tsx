@@ -67,10 +67,23 @@ const AbsenceForm = () => {
     }
 
     if (name === "birthDate") {
-      const birthDatePattern = /^\d{2}\.\d{2}\.\d{2}$/;
-      if (value.length > 8 && !birthDatePattern.test(value)) {
-        return;
+      // Remove any non-digit characters first
+      const numbers = value.replace(/\D/g, "");
+
+      // Add dots after every 2 digits
+      let formattedDate = "";
+      for (let i = 0; i < numbers.length && i < 6; i++) {
+        if (i === 2 || i === 4) {
+          formattedDate += ".";
+        }
+        formattedDate += numbers[i];
       }
+
+      setFormData((prev) => ({
+        ...prev,
+        [name]: formattedDate,
+      }));
+      return;
     }
 
     setFormData((prev) => ({
@@ -78,7 +91,6 @@ const AbsenceForm = () => {
       [name]: value,
     }));
   };
-
   const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     const maxLength = name === "reason" ? 40 : 80;
@@ -229,7 +241,10 @@ const AbsenceForm = () => {
       appendix: documentFile,
     };
 
+    console.log(transformedData);
+
     setConfirmForm(transformedData);
+    router.push("/preview");
   };
 
   return (
@@ -433,7 +448,7 @@ const AbsenceForm = () => {
                   />
                   <Label
                     htmlFor={category}
-                    className={`flex items-center justify-center w-full px-4 py-2 rounded-lg border-2 w-[200px]
+                    className={`flex items-center justify-center w-full px-4 py-2 rounded-lg border-2
                      cursor-pointer text-center transition-all duration-200
                      ${
                        formData.absentCategory === category
@@ -549,16 +564,13 @@ const AbsenceForm = () => {
             />
           </div>
 
-          {/* 제출 버튼 */}
-          <Link href={"/preview"}>
-            <Button
-              type="submit"
-              className="w-full mt-[20px] bg-[#3396f4] hover:bg-[#3396f4]/80 text-white py-2 rounded-lg 
+          <Button
+            type="submit"
+            className="w-full mt-[20px] bg-[#3396f4] hover:bg-[#3396f4]/80 text-white py-2 rounded-lg 
                      transition-colors duration-200 focus:ring-2 focus:ring-[#3396f4] focus:ring-offset-2"
-            >
-              제출하기
-            </Button>
-          </Link>
+          >
+            제출하기
+          </Button>
         </form>
       </CardContent>
     </Card>
