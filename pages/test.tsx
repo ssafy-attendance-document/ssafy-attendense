@@ -42,8 +42,11 @@ const AttendancePreview: React.FC<AttendancePreviewProps> = () => {
     absentDay: "11",
     absentTime: 1,
     absentCategory: 0,
-    absentReason: "병원 방문\n가족 치료",
-    absentDetail: "서울 종합병원\n2시간 진료",
+    absentReason:
+      "병원 방문\n가족 치료병원 방문\n가족 치료병원 방문\n가족 치료병원 방문\n가족 치료병원 방문\n가족 치료병원 방문\n가족 치료병원 방문\n가족 치료병원 방문\n가족 치료병원 방문\n가족 치료",
+    // 세부내용 24자 이후 줄넘김
+    absentDetail:
+      "갉갉갉갉갉갉갉갉갉갉갉갉갉갉갉갉갉갉갉갉갉갉갉궑뷁갉갉갉갉갉갉갉갉갉갉갉갉갉갉갉갉갉갉갉갉갉갉갉갉갉갉갉갉갉갉갉갉갉갉갉갉갉갉갉갉갉갉",
     absentPlace: "서울 강남구",
     signatureUrl: "/체크.png",
     campus: "서울 캠퍼스",
@@ -57,6 +60,7 @@ const AttendancePreview: React.FC<AttendancePreviewProps> = () => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [fontStyleOne, setFontStyleOne] = useState<string>("");
   const [fontStyleTwo, setFontStyleTwo] = useState<string>("");
+  const [fontStyleReason, setFontStyleReason] = useState<string>("");
   const [canvasSize, setCanvasSize] = useState({ width: 0, height: 0 });
 
   // A4 비율 유지를 위한 상수
@@ -71,23 +75,33 @@ const AttendancePreview: React.FC<AttendancePreviewProps> = () => {
   const fontStyleOneCoordinate: Record<string, [number, number]> = {
     name: [0.32, 0.2293],
     birthday: [0.66, 0.229],
-    absentYear: [0.352, 0.273],
-    absentMonth: [0.45, 0.273],
-    absentDay: [0.53, 0.273],
+    absentYear: [0.354, 0.273],
+    absentMonth: [0.444, 0.273],
+    absentDay: [0.52, 0.273],
+
     absentPlace: [0.32, 0.647],
     signature: [0.85, 0.66],
     absentName: [0.32, 0.68],
   };
+
+  // 공가/사유 체크박스
+  const absentCategoryCoordinate = [
+    [0.1, 0.2],
+    [0.1, 0.22],
+  ];
+  // 공가/사유 내용
+  const absentDetailReasonCoordinate = [
+    [0.31, 0.413],
+    [0.53, 0.455],
+  ];
 
   const absentTime = [
     [0.6075, 0.26],
     [0.7, 0.26],
     [0.7915, 0.26],
   ];
-  const absentCategoryCoordinate = [
-    [0.1, 0.2],
-    [0.1, 0.22],
-  ];
+
+  const absentDetailCoordinate = [0.35, 0.55];
 
   // 화면 크기 변경 감지 및 캔버스 크기 조정
   useEffect(() => {
@@ -137,8 +151,9 @@ const AttendancePreview: React.FC<AttendancePreviewProps> = () => {
 
     const fontSize = Math.max(canvasSize.width * 0.02, 12); // 최소 폰트 크기 설정
 
-    setFontStyleOne(`bold ${fontSize}px serif`);
+    setFontStyleOne(`${fontSize + 4}px serif`);
     setFontStyleTwo(`bold ${fontSize * 1.7}px serif`);
+    setFontStyleReason(`${fontSize + 2}px serif`);
 
     const docsImg1 = new Image();
     docsImg1.src = docsImageUrls[0];
@@ -162,12 +177,38 @@ const AttendancePreview: React.FC<AttendancePreviewProps> = () => {
           coord[0] * canvasSize.width,
           coord[1] * canvasSize.height
         );
-        ctx1.fillText(
-          "서울 강남구",
-          fontStyleOneCoordinate.absentName[0] * canvasSize.width,
-          fontStyleOneCoordinate.absentName[1] * canvasSize.height
-        );
       });
+      const absentReaseon1 = userInput.absentDetail.slice(0, 20);
+      const absentReaseon2 = userInput.absentDetail.slice(20, 40);
+      const absentReaseon3 = userInput.absentDetail.slice(40, 60);
+      const absentReaseon4 = userInput.absentDetail.slice(60, 80);
+
+      ctx1.fillText(
+        absentReaseon1,
+        absentDetailCoordinate[0] * canvasSize.width,
+        absentDetailCoordinate[1] * canvasSize.height
+      );
+      ctx1.fillText(
+        absentReaseon2,
+        absentDetailCoordinate[0] * canvasSize.width,
+        (absentDetailCoordinate[1] + 0.02) * canvasSize.height
+      );
+      ctx1.fillText(
+        absentReaseon3,
+        absentDetailCoordinate[0] * canvasSize.width,
+        (absentDetailCoordinate[1] + 0.04) * canvasSize.height
+      );
+      ctx1.fillText(
+        absentReaseon4,
+        absentDetailCoordinate[0] * canvasSize.width,
+        (absentDetailCoordinate[1] + 0.06) * canvasSize.height
+      );
+
+      ctx1.fillText(
+        userInput.name,
+        fontStyleOneCoordinate.absentName[0] * canvasSize.width,
+        fontStyleOneCoordinate.absentName[1] * canvasSize.height
+      );
 
       const checkedAbsentCategory = userInput.absentCategory;
       ctx1.drawImage(
@@ -177,6 +218,47 @@ const AttendancePreview: React.FC<AttendancePreviewProps> = () => {
         0.025 * window.innerWidth,
         0.02 * ((window.innerWidth * 4) / 3)
       );
+
+      // 공가/사유 박스
+      ctx1.font = fontStyleReason;
+      if (userInput.absentCategory === 0) {
+        // absentReason
+        const absentReason1 = userInput.absentReason.slice(0, 20);
+        const absentReason2 = userInput.absentReason.slice(20, 40);
+
+        ctx1.fillText(
+          absentReason1,
+          absentDetailReasonCoordinate[userInput.absentCategory][0] *
+            canvasSize.width,
+          absentDetailReasonCoordinate[userInput.absentCategory][1] *
+            canvasSize.height
+        );
+        ctx1.fillText(
+          absentReason2,
+          absentDetailReasonCoordinate[userInput.absentCategory][0] *
+            canvasSize.width,
+          (absentDetailReasonCoordinate[userInput.absentCategory][1] + 0.02) *
+            canvasSize.height
+        );
+      } else if (userInput.absentCategory === 1) {
+        const absentReason1 = userInput.absentReason.slice(0, 12);
+        const absentReason2 = userInput.absentReason.slice(12, 40);
+
+        ctx1.fillText(
+          absentReason1,
+          absentDetailReasonCoordinate[userInput.absentCategory][0] *
+            canvasSize.width,
+          absentDetailReasonCoordinate[userInput.absentCategory][1] *
+            canvasSize.height
+        );
+        ctx1.fillText(
+          absentReason2,
+          (absentDetailReasonCoordinate[userInput.absentCategory][0] - 0.29) *
+            canvasSize.width,
+          (absentDetailReasonCoordinate[userInput.absentCategory][1] + 0.023) *
+            canvasSize.height
+        );
+      }
 
       // 마지막 날짜
       ctx1.font = fontStyleTwo;
