@@ -1,115 +1,482 @@
-import Image from "next/image";
-import localFont from "next/font/local";
+import React, { useState, useRef, useEffect } from "react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import {
+  MapPin,
+  Users,
+  User,
+  Calendar,
+  Clock,
+  FileText,
+  MessageSquare,
+  Building,
+  Pen,
+  FileImage,
+  IdCard,
+} from "lucide-react";
 
-const geistSans = localFont({
-  src: "./fonts/GeistVF.woff",
-  variable: "--font-geist-sans",
-  weight: "100 900",
-});
-const geistMono = localFont({
-  src: "./fonts/GeistMonoVF.woff",
-  variable: "--font-geist-mono",
-  weight: "100 900",
-});
-
-export default function Home() {
-  return (
-    <div
-      className={`${geistSans.variable} ${geistMono.variable} grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]`}
-    >
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="https://nextjs.org/icons/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              pages/index.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="https://nextjs.org/icons/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
-  );
+interface FormData {
+  location: string;
+  classNumber: string;
+  name: string;
+  birthDate: string;
+  absenceDate: string;
+  category: string;
+  reason: string;
+  details: string;
+  place: string;
 }
+
+const AbsenceForm = () => {
+  const [formData, setFormData] = useState<FormData>({
+    location: "",
+    classNumber: "",
+    name: "",
+    birthDate: "",
+    absenceDate: "",
+    category: "오전",
+    reason: "",
+    details: "",
+    place: "",
+  });
+
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const [isDrawing, setIsDrawing] = useState(false);
+  const [signatureData, setSignatureData] = useState<string | null>(null);
+  const [documentFile, setDocumentFile] = useState<File | null>(null);
+  const [lastPos, setLastPos] = useState({ x: 0, y: 0 });
+
+  const locations = ["서울", "대전", "구미", "부울경", "대구"];
+
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    const { name, value } = e.target;
+
+    if (name === "name" && value.length > 5) {
+      return;
+    }
+
+    if (name === "birthDate") {
+      const birthDatePattern = /^\d{2}\.\d{2}\.\d{2}$/;
+      if (value.length > 8 && !birthDatePattern.test(value)) {
+        return;
+      }
+    }
+
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    const maxLength = name === "reason" ? 40 : 80;
+
+    if (value.length <= maxLength) {
+      setFormData((prev) => ({
+        ...prev,
+        [name]: value,
+      }));
+    }
+  };
+
+  // 캔버스 초기화 및 설정
+  useEffect(() => {
+    if (canvasRef.current) {
+      const canvas = canvasRef.current;
+      const ctx = canvas.getContext("2d");
+      if (ctx) {
+        ctx.strokeStyle = "#000";
+        ctx.lineWidth = 2;
+        ctx.lineCap = "round";
+        ctx.lineJoin = "round";
+
+        // 캔버스 크기를 컨테이너에 맞게 설정
+        const resizeCanvas = () => {
+          const container = canvas.parentElement;
+          if (container) {
+            const rect = container.getBoundingClientRect();
+            canvas.width = rect.width - 20; // 패딩 고려
+            canvas.height = 200;
+            ctx.strokeStyle = "#000";
+            ctx.lineWidth = 2;
+            ctx.lineCap = "round";
+            ctx.lineJoin = "round";
+          }
+        };
+
+        resizeCanvas();
+        window.addEventListener("resize", resizeCanvas);
+
+        return () => window.removeEventListener("resize", resizeCanvas);
+      }
+    }
+  }, []);
+
+  const getCanvasMousePosition = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    if (!canvasRef.current) return { x: 0, y: 0 };
+
+    const canvas = canvasRef.current;
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+
+    return {
+      x: (e.clientX - rect.left) * scaleX,
+      y: (e.clientY - rect.top) * scaleY,
+    };
+  };
+
+  const startDrawing = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    setIsDrawing(true);
+    const pos = getCanvasMousePosition(e);
+    setLastPos(pos);
+  };
+
+  const draw = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    if (!isDrawing || !canvasRef.current) return;
+
+    const ctx = canvasRef.current.getContext("2d");
+    if (!ctx) return;
+
+    const currentPos = getCanvasMousePosition(e);
+
+    ctx.beginPath();
+    ctx.moveTo(lastPos.x, lastPos.y);
+    ctx.lineTo(currentPos.x, currentPos.y);
+    ctx.stroke();
+
+    setLastPos(currentPos);
+  };
+
+  const stopDrawing = () => {
+    setIsDrawing(false);
+    if (canvasRef.current) {
+      setSignatureData(canvasRef.current.toDataURL());
+    }
+  };
+
+  const clearSignature = () => {
+    if (!canvasRef.current) return;
+
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext("2d");
+    if (ctx) {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      setSignatureData(null);
+    }
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    // 결석일시 분리
+    const [absenceYear, absenceMonth, absenceDay] = formData.absenceDate
+      .split("-")
+      .map(String);
+
+    console.log({
+      ...formData,
+      absenceYear,
+      absenceMonth,
+      absenceDay,
+      signatureData,
+      documentFile: documentFile ? documentFile.name : null,
+    });
+  };
+  return (
+    <Card className="w-full max-w-2xl mx-auto bg-white shadow-lg">
+      <CardContent className="p-6">
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* 지역 선택 */}
+          <div className="space-y-2">
+            <Label
+              htmlFor="location"
+              className="flex items-center gap-2 text-sm font-medium"
+              aria-label="지역 선택"
+            >
+              <MapPin className="w-4 h-4 text-[#3396f4]" />
+              지역
+            </Label>
+            <select
+              id="location"
+              name="location"
+              value={formData.location}
+              onChange={handleInputChange}
+              className="w-full p-2 border rounded-md focus:ring-2 focus:ring-[#3396f4] focus:border-[#3396f4]"
+              required
+              aria-required="true"
+            >
+              <option value="">선택하세요</option>
+              {locations.map((loc) => (
+                <option key={loc} value={loc}>
+                  {loc}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* 반 번호 */}
+          <div className="space-y-2">
+            <Label
+              htmlFor="classNumber"
+              className="flex items-center gap-2 text-sm font-medium"
+              aria-label="반 번호 입력"
+            >
+              <Users className="w-4 h-4 text-[#3396f4]" />반
+            </Label>
+            <Input
+              type="number"
+              id="classNumber"
+              name="classNumber"
+              value={formData.classNumber}
+              onChange={handleInputChange}
+              required
+              aria-required="true"
+              className="focus:ring-2 focus:ring-[#3396f4] focus:border-[#3396f4]"
+            />
+          </div>
+
+          {/* 이름 */}
+          <div className="space-y-2">
+            <Label
+              htmlFor="name"
+              className="flex items-center gap-2 text-sm font-medium"
+              aria-label="성명 입력"
+            >
+              <User className="w-4 h-4 text-[#3396f4]" />
+              성명
+            </Label>
+            <Input
+              type="text"
+              id="name"
+              name="name"
+              minLength={2}
+              maxLength={4}
+              value={formData.name}
+              onChange={handleInputChange}
+              required
+              aria-required="true"
+              className="focus:ring-2 focus:ring-[#3396f4] focus:border-[#3396f4]"
+            />
+          </div>
+
+          {/* 생년월일 */}
+          <div className="space-y-2">
+            <Label
+              htmlFor="birthDate"
+              className="flex items-center gap-2 text-sm font-medium"
+              aria-label="생년월일 입력"
+            >
+              <IdCard className="w-4 h-4 text-[#3396f4]" />
+              생년월일
+            </Label>
+            <Input
+              type="text"
+              id="birthDate"
+              name="birthDate"
+              placeholder="YY.MM.DD"
+              value={formData.birthDate}
+              onChange={handleInputChange}
+              required
+              className="focus:ring-2 focus:ring-[#3396f4] focus:border-[#3396f4]"
+            />
+          </div>
+
+          {/* 결석일시 */}
+          <div className="space-y-2">
+            <Label
+              htmlFor="absenceDate"
+              className="flex items-center gap-2 text-sm font-medium"
+              aria-label="결석일시 선택"
+            >
+              <Calendar className="w-4 h-4 text-[#3396f4]" />
+              결석일시
+            </Label>
+            <Input
+              type="date"
+              id="absenceDate"
+              name="absenceDate"
+              value={formData.absenceDate}
+              onChange={handleInputChange}
+              required
+              className="focus:ring-2 focus:ring-[#3396f4] focus:border-[#3396f4]"
+            />
+          </div>
+
+          {/* 장소 */}
+          <div className="space-y-2">
+            <Label
+              htmlFor="place"
+              className="flex items-center gap-2 text-sm font-medium"
+              aria-label="장소 입력"
+            >
+              <Building className="w-4 h-4 text-[#3396f4]" />
+              장소
+            </Label>
+            <Input
+              type="text"
+              id="place"
+              name="place"
+              value={formData.place}
+              onChange={handleInputChange}
+              required
+              className="focus:ring-2 focus:ring-[#3396f4] focus:border-[#3396f4]"
+            />
+          </div>
+          {/* 분류 부분 */}
+          <div className="space-y-2">
+            <Label className="flex items-center gap-2 text-sm font-medium">
+              <Clock className="w-4 h-4 text-[#3396f4]" />
+              분류
+            </Label>
+            <RadioGroup
+              value={formData.category}
+              onValueChange={(value) =>
+                setFormData((prev) => ({ ...prev, category: value }))
+              }
+              className="flex flex-row justify-start gap-6"
+              aria-label="결석 분류 선택"
+            >
+              {["오전", "오후", "공가"].map((category) => (
+                <div key={category} className="flex items-center flex-1">
+                  <RadioGroupItem
+                    value={category}
+                    id={category}
+                    className="peer sr-only"
+                  />
+                  <Label
+                    htmlFor={category}
+                    className="flex items-center justify-center w-full px-4 py-2 rounded-lg border-2 
+                             cursor-pointer text-center
+                             peer-checked:bg-[#3396f4] peer-checked:text-white peer-checked:border-[#3396f4]
+                             hover:bg-[#3396f4]/10 transition-colors"
+                  >
+                    {category}
+                  </Label>
+                </div>
+              ))}
+            </RadioGroup>
+          </div>
+
+          <div className="space-y-2">
+            <Label
+              htmlFor="reason"
+              className="flex items-center gap-2 text-sm font-medium"
+              aria-label="결석 사유 입력"
+            >
+              <FileText className="w-4 h-4 text-[#3396f4]" />
+              사유 (최대 40자)
+            </Label>
+            <textarea
+              id="reason"
+              name="reason"
+              value={formData.reason}
+              onChange={handleTextareaChange}
+              className="w-full p-2 border rounded-md min-h-[80px] resize-none 
+                       focus:ring-2 focus:ring-[#3396f4] focus:border-[#3396f4]"
+              required
+              aria-required="true"
+              maxLength={40}
+            />
+            <div className="text-sm text-gray-500 text-right">
+              {formData.reason.length}/40자
+            </div>
+          </div>
+
+          {/* 세부내용 */}
+          <div className="space-y-2">
+            <Label
+              htmlFor="details"
+              className="flex items-center gap-2 text-sm font-medium"
+              aria-label="세부내용 입력"
+            >
+              <MessageSquare className="w-4 h-4 text-[#3396f4]" />
+              세부내용 (최대 80자)
+            </Label>
+            <textarea
+              id="details"
+              name="details"
+              value={formData.details}
+              onChange={handleTextareaChange}
+              className="w-full p-2 border rounded-md min-h-[120px] resize-none 
+                       focus:ring-2 focus:ring-[#3396f4] focus:border-[#3396f4]"
+              required
+              aria-required="true"
+              maxLength={80}
+            />
+            <div className="text-sm text-gray-500 text-right">
+              {formData.details.length}/80자
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label
+              className="flex items-center gap-2 text-sm font-medium"
+              aria-label="서명 입력"
+            >
+              <Pen className="w-4 h-4 text-[#3396f4]" />
+              서명
+            </Label>
+            <div className="border rounded-md p-2 bg-white">
+              <canvas
+                ref={canvasRef}
+                className="border rounded cursor-crosshair w-full touch-none"
+                onMouseDown={startDrawing}
+                onMouseMove={draw}
+                onMouseUp={stopDrawing}
+                onMouseOut={stopDrawing}
+                aria-label="서명 캔버스"
+              />
+              <Button
+                type="button"
+                onClick={clearSignature}
+                className="mt-2 bg-gray-100 hover:bg-gray-200 text-gray-700"
+                variant="outline"
+              >
+                서명 지우기
+              </Button>
+            </div>
+          </div>
+
+          {/* 증빙서류 */}
+          <div className="space-y-2">
+            <Label
+              htmlFor="document"
+              className="flex items-center gap-2 text-sm font-medium"
+              aria-label="증빙서류 업로드"
+            >
+              <FileImage className="w-4 h-4 text-[#3396f4]" />
+              증빙서류
+            </Label>
+            <Input
+              type="file"
+              id="document"
+              accept="image/*"
+              onChange={(e: any) => setDocumentFile(e.target.files[0])}
+              required
+              aria-required="true"
+              className="focus:ring-2 focus:ring-[#3396f4] focus:border-[#3396f4]"
+            />
+          </div>
+
+          {/* 제출 버튼 */}
+          <Button
+            type="submit"
+            className="w-full bg-[#3396f4] hover:bg-[#3396f4]/80 text-white py-2 rounded-lg 
+                     transition-colors duration-200 focus:ring-2 focus:ring-[#3396f4] focus:ring-offset-2"
+          >
+            제출하기
+          </Button>
+        </form>
+      </CardContent>
+    </Card>
+  );
+};
+
+export default AbsenceForm;
