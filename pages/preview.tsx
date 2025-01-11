@@ -1,28 +1,11 @@
 import React, { useEffect, useRef, useState } from "react";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
-import { useConfirmStore } from "@/store/confirmStore";
+import { TransformedData, useConfirmStore } from "@/store/confirmStore";
 import { useRouter } from "next/router";
 
-interface UserInput {
-  name: string;
-  birthday: string;
-  absentYear: string;
-  absentMonth: string;
-  absentDay: string;
-  absentTime: number;
-  absentCategory: number;
-  absentReason: string;
-  absentDetail: string;
-  absentPlace: string;
-  signatureUrl: string;
-  pictureUrl: string[];
-  campus: string;
-  class: string;
-}
-
 interface AttendancePreviewProps {
-  userInput: UserInput;
+  userInput: TransformedData;
 }
 
 const AttendancePreview: React.FC<AttendancePreviewProps> = () => {
@@ -183,7 +166,7 @@ const AttendancePreview: React.FC<AttendancePreviewProps> = () => {
       // 텍스트 렌더링
       Object.keys(fontStyleOneCoordinate).forEach((key) => {
         const coord = fontStyleOneCoordinate[key];
-        const value = userInput[key as keyof UserInput] || "";
+        const value = userInput[key as keyof TransformedData] || "";
         ctx1.fillText(
           value as string,
           coord[0] * canvasSize.width,
