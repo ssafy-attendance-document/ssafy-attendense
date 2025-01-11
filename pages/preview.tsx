@@ -354,7 +354,7 @@ const AttendancePreview: React.FC<AttendancePreviewProps> = () => {
       </div>
       <div
         className="canvas-container"
-        style={{ width: "100%", maxWidth: "800px", margin: "0 auto" }}
+        style={{ width: "100%", maxWidth: "800px" }}
       >
         <canvas
           id="container"
