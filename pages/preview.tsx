@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
+import { useConfirmStore } from "@/store/confirmStore";
 
 interface UserInput {
   name: string;
@@ -34,24 +35,26 @@ const AttendancePreview: React.FC<AttendancePreviewProps> = () => {
     currentDay: currentDay,
   };
 
-  const userInput = {
-    name: "홍길동",
-    birthday: "1995-05-15",
-    absentYear: "25",
-    absentMonth: "01",
-    absentDay: "11",
-    absentTime: 1,
-    absentCategory: 0,
-    absentReason:
-      "병원 방문\n가족 치료병원 방문\n가족 치료병원 방문\n가족 치료병원 방문\n가족 치료병원 방문\n가족 치료병원 방문\n가족 치료병원 방문\n가족 치료병원 방문\n가족 치료병원 방문\n가족 치료",
-    // 세부내용 24자 이후 줄넘김
-    absentDetail:
-      "갉갉갉갉갉갉갉갉갉갉갉갉갉갉갉갉갉갉갉갉갉갉갉궑뷁갉갉갉갉갉갉갉갉갉갉갉갉갉갉갉갉갉갉갉갉갉갉갉갉갉갉갉갉갉갉갉갉갉갉갉갉갉갉갉갉갉갉",
-    absentPlace: "서울 강남구",
-    signatureUrl: "/체크.png",
-    campus: "서울 캠퍼스",
-    class: "3학년 1반",
-  };
+  const { formData: userInput } = useConfirmStore();
+  console.log(userInput);
+  // const userInput = {
+  //   name: "홍길동",
+  //   birthday: "1995-05-15",
+  //   absentYear: "25",
+  //   absentMonth: "01",
+  //   absentDay: "11",
+  //   absentTime: 1,
+  //   absentCategory: 1,
+  //   absentReason:
+  //     "병원 방문\n가족 치료병원 방문\n가족 치료병원 방문\n가족 치료병원 방문\n가족 치료병원 방문\n가족 치료병원 방문\n가족 치료병원 방문\n가족 치료병원 방문\n가족 치료병원 방문\n가족 치료",
+  //   // 세부내용 24자 이후 줄넘김
+  //   absentDetail:
+  //     "갉갉갉갉갉갉갉갉갉갉갉갉갉갉갉갉갉갉갉갉갉갉갉궑뷁갉갉갉갉갉갉갉갉갉갉갉갉갉갉갉갉갉갉갉갉갉갉갉갉갉갉갉갉갉갉갉갉갉갉갉갉갉갉갉갉갉갉",
+  //   absentPlace: "서울 강남구",
+  //   signatureUrl: "/체크.png",
+  //   campus: "서울 캠퍼스",
+  //   class: "3학년 1반",
+  // };
 
   const docsImageUrls = ["/소명확인서.png", "/소명확인서-별첨.png"];
 
@@ -80,14 +83,14 @@ const AttendancePreview: React.FC<AttendancePreviewProps> = () => {
     absentDay: [0.52, 0.273],
 
     absentPlace: [0.32, 0.647],
-    signature: [0.85, 0.66],
+    signature: [0.8, 0.64],
     absentName: [0.32, 0.68],
   };
 
   // 공가/사유 체크박스
   const absentCategoryCoordinate = [
-    [0.1, 0.2],
-    [0.1, 0.22],
+    [0.102, 0.201],
+    [0.102, 0.2223],
   ];
   // 공가/사유 내용
   const absentDetailReasonCoordinate = [
@@ -215,8 +218,8 @@ const AttendancePreview: React.FC<AttendancePreviewProps> = () => {
         imgCheck,
         absentCategoryCoordinate[checkedAbsentCategory][0] * canvas1.width,
         absentCategoryCoordinate[checkedAbsentCategory][1] * canvas1.height,
-        0.025 * window.innerWidth,
-        0.02 * ((window.innerWidth * 4) / 3)
+        checkSize / 2,
+        checkSize / 2
       );
 
       // 공가/사유 박스
@@ -273,8 +276,8 @@ const AttendancePreview: React.FC<AttendancePreviewProps> = () => {
       });
 
       // 서명 이미지
-      const signatureWidth = canvasSize.width * 0.07;
-      const signatureHeight = canvasSize.height * 0.035;
+      const signatureWidth = canvasSize.width * 0.14;
+      const signatureHeight = canvasSize.height * 0.07;
       ctx1.drawImage(
         signatureImage,
         fontStyleOneCoordinate.signature[0] * canvasSize.width,
@@ -318,7 +321,7 @@ const AttendancePreview: React.FC<AttendancePreviewProps> = () => {
       pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight);
       pdf.addPage();
       pdf.save(
-        `${userInput.absentYear}${userInput.absentMonth}${userInput.absentDay}_출결확인서_${userInput.name}.pdf`
+        `${userInput.absentYear}${userInput.absentMonth}${userInput.absentDay}_출결확인서_${userInput.name}[${userInput.class}].pdf`
       );
     });
   };
