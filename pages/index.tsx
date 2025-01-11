@@ -19,6 +19,7 @@ import {
 
 interface FormData {
   location: string;
+  absentCategory: string;
   classNumber: string;
   name: string;
   birthDate: string;
@@ -36,6 +37,7 @@ const AbsenceForm = () => {
     name: "",
     birthDate: "",
     absenceDate: "",
+    absentCategory: "공가",
     category: "오전",
     reason: "",
     details: "",
@@ -186,8 +188,20 @@ const AbsenceForm = () => {
           return 0;
         case "오후":
           return 1;
-        case "공가":
+        case "종일":
           return 2;
+        default:
+          return 0;
+      }
+    };
+
+    // 시간 및 카테고리 매핑
+    const getAbsentCategory = (category: string): number => {
+      switch (category) {
+        case "공가":
+          return 0;
+        case "사유":
+          return 1;
         default:
           return 0;
       }
@@ -201,7 +215,7 @@ const AbsenceForm = () => {
       absentMonth: absenceMonth,
       absentDay: absenceDay,
       absentTime: getAbsentTime(formData.category),
-      absentCategory: formData.category === "공가" ? 0 : 1,
+      absentCategory: getAbsentCategory(formData.absentCategory),
       absentReason: formData.reason,
       absentDetail: formData.details,
       absentPlace: formData.place,
@@ -368,7 +382,7 @@ const AbsenceForm = () => {
               className="flex flex-row justify-start gap-6"
               aria-label="결석 분류 선택"
             >
-              {["오전", "오후", "공가"].map((category) => (
+              {["오전", "오후", "종일"].map((category) => (
                 <div key={category} className="flex items-center flex-1">
                   <RadioGroupItem
                     value={category}
@@ -377,10 +391,47 @@ const AbsenceForm = () => {
                   />
                   <Label
                     htmlFor={category}
-                    className={`flex items-center justify-center w-full px-4 py-2 rounded-lg border-2 
+                    className={`flex items-center justify-center w-full px-4 py-2 rounded-lg border-2 w-[200px]
                      cursor-pointer text-center transition-all duration-200
                      ${
                        formData.category === category
+                         ? "bg-[#3396f4] text-white border-[#3396f4] shadow-md transform scale-[1.02]"
+                         : "bg-white text-gray-700 border-gray-200 hover:bg-[#3396f4]/10 hover:border-[#3396f4]/30"
+                     }`}
+                  >
+                    {category}
+                  </Label>
+                </div>
+              ))}
+            </RadioGroup>
+          </div>
+
+          <div className="space-y-2">
+            <Label className="flex items-center gap-2 text-sm font-medium">
+              <Clock className="w-4 h-4 text-[#3396f4]" />
+              공가사유
+            </Label>
+            <RadioGroup
+              value={formData.absentCategory}
+              onValueChange={(value) =>
+                setFormData((prev) => ({ ...prev, absentCategory: value }))
+              }
+              className="flex justify-start gap-6"
+              aria-label="결석 분류 선택"
+            >
+              {["공가", "사유"].map((category) => (
+                <div key={category} className="flex items-center">
+                  <RadioGroupItem
+                    value={category}
+                    id={category}
+                    className="peer sr-only"
+                  />
+                  <Label
+                    htmlFor={category}
+                    className={`flex items-center justify-center w-full px-4 py-2 rounded-lg border-2 w-[200px]
+                     cursor-pointer text-center transition-all duration-200
+                     ${
+                       formData.absentCategory === category
                          ? "bg-[#3396f4] text-white border-[#3396f4] shadow-md transform scale-[1.02]"
                          : "bg-white text-gray-700 border-gray-200 hover:bg-[#3396f4]/10 hover:border-[#3396f4]/30"
                      }`}
