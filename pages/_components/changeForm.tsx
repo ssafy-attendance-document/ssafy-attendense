@@ -14,6 +14,7 @@ import {
   Pen,
   IdCard,
 } from "lucide-react";
+import useAttendanceStore from "@/store/changeStore";
 
 interface FormData {
   location: string;
@@ -55,7 +56,8 @@ const AttendanceChangeForm = () => {
   const reasons = ["입실 미클릭", "입실 오클릭", "퇴실 미클릭", "퇴실 오클릭"];
   const periods = ["오전", "오후", "시간"];
 
-  // Canvas 관련 함수들...
+  const { updateForm } = useAttendanceStore();
+
   useEffect(() => {
     if (canvasRef.current) {
       const canvas = canvasRef.current;
@@ -136,10 +138,7 @@ const AttendanceChangeForm = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log({
-      ...formData,
-      signatureData,
-    });
+    updateForm(formData);
   };
 
   return (
