@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 import { useConfirmStore } from "@/store/confirmStore";
+import { useRouter } from "next/router";
 
 interface UserInput {
   name: string;
@@ -25,6 +26,8 @@ interface AttendancePreviewProps {
 }
 
 const AttendancePreview: React.FC<AttendancePreviewProps> = () => {
+  const router = useRouter();
+
   const today = new Date();
   const currentYear = String(today.getFullYear()).slice(2, 4);
   const currentMonth = String(today.getMonth() + 1);
@@ -37,6 +40,7 @@ const AttendancePreview: React.FC<AttendancePreviewProps> = () => {
 
   const { formData: userInput } = useConfirmStore();
   console.log(userInput);
+
   // const userInput = {
   //   name: "홍길동",
   //   birthday: "1995-05-15",
@@ -109,6 +113,10 @@ const AttendancePreview: React.FC<AttendancePreviewProps> = () => {
 
   // 화면 크기 변경 감지 및 캔버스 크기 조정
   useEffect(() => {
+    if (!userInput.name) {
+      router.replace("/");
+    }
+
     const updateCanvasSize = () => {
       if (containerRef.current) {
         const containerWidth = containerRef.current.clientWidth;
